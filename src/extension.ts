@@ -16,13 +16,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('kanzen.helloWorld', async () => {
+	let disposableCreateTestCase = vscode.commands.registerCommand('kanzen.createTestCase', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-
-		const configuration = new Configuration({
-			apiKey: process.env.OPENAI_API_TOKEN,
-		});
 
 		const editor = vscode.window.activeTextEditor;
 		const selection = editor?.selection;
@@ -32,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const command = "Create JUnit5 Test Case for the following piece of code. Include positive and negative test cases. :";
 
-		const response = await callOpenAI(configuration, command + selectedText);
+		const response = await callOpenAI(command + selectedText);
 
 		vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
 
@@ -43,10 +39,67 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	context.subscriptions.push(disposable);
+	let disposableRefactorCode = vscode.commands.registerCommand('kanzen.refactorCode', async () => {
+		const editor = vscode.window.activeTextEditor;
+		const selection = editor?.selection;
+		const selectedText = editor?.document.getText(selection);
+
+		vscode.window.showInformationMessage('Refactoring Code!');
+
+		const command = "Java. Refactor code into functional programming style. :";
+
+		const response = await callOpenAI(command + selectedText);
+
+		vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
+
+		var refactoredCode = response.data.choices[0].text;
+		editor?.edit(builder => builder.replace(editor?.selection, refactoredCode));
+
+	});
+
+	let disposableCustom = vscode.commands.registerCommand('kanzen.custom', async () => {
+		const editor = vscode.window.activeTextEditor;
+		const selection = editor?.selection;
+		const selectedText = editor?.document.getText(selection);
+
+		const customCommand = await vscode.window.showInputBox({
+			placeHolder: "Custom Command",
+			prompt: "What do you want to do?",
+			value: selectedText
+		});
+		if (customCommand === '') {
+			console.log(customCommand);
+			vscode.window.showErrorMessage('Custom command is mandatory to execute this action');
+		}
+
+		if (customCommand !== undefined) {
+
+			vscode.window.showInformationMessage('Executing Custom Command!');
+
+			const command = customCommand + " :";
+
+			const response = await callOpenAI(command + selectedText);
+
+			vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
+
+			var refactoredCode = response.data.choices[0].text;
+			editor?.edit(builder => builder.replace(editor?.selection, refactoredCode));
+		}
+
+	});
+
+	context.subscriptions.push(disposableCreateTestCase);
+	context.subscriptions.push(disposableRefactorCode);
+	context.subscriptions.push(disposableCustom);
 }
 
-async function callOpenAI(configuration: any, selectedText: any) {
+
+
+async function callOpenAI(selectedText: any) {
+	const configuration = new Configuration({
+		apiKey: process.env.OPENAI_API_TOKEN,
+	});
+
 	const openai = new OpenAIApi(configuration);
 	const response = await openai.createCompletion({
 		model: "text-davinci-003",

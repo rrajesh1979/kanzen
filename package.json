@@ -10,14 +10,28 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:kanzen.helloWorld"
+    "onCommand:kanzen.createTestCase",
+    "onCommand:kanzen.refactorCode",
+    "onCommand:kanzen.custom"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "kanzen.helloWorld",
-        "title": "Hello World"
+        "command": "kanzen.createTestCase",
+        "title": "Kanzen: Create Test Case"
+      },
+      {
+        "command": "kanzen.refactorCode",
+        "title": "Kanzen: Refactor Code"
+      },
+      {
+        "command": "kanzen.generateScaffold",
+        "title": "Kanzen: Generate Scaffold"
+      },
+      {
+        "command": "kanzen.custom",
+        "title": "Kanzen: Custom"
       }
     ]
   },
