@@ -30,8 +30,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const response = await callOpenAI(command + selectedText);
 
-		vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
-
 		//Write the response to the file
 		const fileUri = vscode.Uri.file("/Users/rajesh/Learn/tmp/PalindromeTest.java");
 		await vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(response.data.choices[0].text));
@@ -39,7 +37,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	let disposableRefactorCode = vscode.commands.registerCommand('kanzen.refactorCode', async () => {
+	let disposableExplainCode = vscode.commands.registerCommand('kanzen.explainCode', async () => {
+		const editor = vscode.window.activeTextEditor;
+		const selection = editor?.selection;
+		const selectedText = editor?.document.getText(selection);
+
+		vscode.window.showInformationMessage('Generating Explanation for Code!');
+
+		const command = "Generate explanation for this segment of code. :";
+
+		const response = await callOpenAI(command + selectedText);
+
+		var codeExplanation = response.data.choices[0].text;
+		codeExplanation = addNewLine(codeExplanation);
+		editor?.edit(builder => builder.replace(editor?.selection, "/*\n" + codeExplanation + "\n*/" + "\n" + selectedText));
+
+	});
+
+	let disposableRefactorCodeToFunctional = vscode.commands.registerCommand('kanzen.refactorCodeToFunctional', async () => {
 		const editor = vscode.window.activeTextEditor;
 		const selection = editor?.selection;
 		const selectedText = editor?.document.getText(selection);
@@ -49,8 +64,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const command = "Java. Refactor code into functional programming style. :";
 
 		const response = await callOpenAI(command + selectedText);
-
-		vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
 
 		var refactoredCode = response.data.choices[0].text;
 		editor?.edit(builder => builder.replace(editor?.selection, refactoredCode));
@@ -65,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const customCommand = await vscode.window.showInputBox({
 			placeHolder: "Custom Command",
 			prompt: "What do you want to do?",
-			value: selectedText
+			value: ""
 		});
 		if (customCommand === '') {
 			console.log(customCommand);
@@ -80,8 +93,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const response = await callOpenAI(command + selectedText);
 
-			vscode.window.showInformationMessage("OpenAI Response :" + response.data.choices[0].text);
-
 			var refactoredCode = response.data.choices[0].text;
 			editor?.edit(builder => builder.replace(editor?.selection, refactoredCode));
 		}
@@ -89,8 +100,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposableCreateTestCase);
-	context.subscriptions.push(disposableRefactorCode);
+	context.subscriptions.push(disposableRefactorCodeToFunctional);
 	context.subscriptions.push(disposableCustom);
+	context.subscriptions.push(disposableExplainCode);
 }
 
 
@@ -105,9 +117,19 @@ async function callOpenAI(selectedText: any) {
 		model: "text-davinci-003",
 		prompt: selectedText,
 		max_tokens: 1024,
-		temperature: 1,
+		temperature: 0.6,
 	});
 	return response;
+}
+
+//Function to add newline characters for every line in the input string
+function addNewLine(input: string) {
+	var output = "";
+	var lines = input.split(". ");
+	for (var i = 0; i < lines.length; i++) {
+		output += lines[i] + "\n";
+	}
+	return output;
 }
 
 // This method is called when your extension is deactivated

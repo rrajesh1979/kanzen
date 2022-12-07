@@ -11,7 +11,8 @@
   ],
   "activationEvents": [
     "onCommand:kanzen.createTestCase",
-    "onCommand:kanzen.refactorCode",
+    "onCommand:kanzen.explainCode",
+    "onCommand:kanzen.refactorCodeToFunctional",
     "onCommand:kanzen.custom"
   ],
   "main": "./out/extension.js",
@@ -22,8 +23,12 @@
         "title": "Kanzen: Create Test Case"
       },
       {
-        "command": "kanzen.refactorCode",
+        "command": "kanzen.refactorCodeToFunctional",
         "title": "Kanzen: Refactor Code"
+      },
+      {
+        "command": "kanzen.explainCode",
+        "title": "Kanzen: Explain Code"
       },
       {
         "command": "kanzen.generateScaffold",
