@@ -1,25 +1,13 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { TextEncoder } from 'util';
 
 const { Configuration, OpenAIApi } = require("openai");
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "kanzen" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
 	let disposableCreateTestCase = vscode.commands.registerCommand('kanzen.createTestCase', async () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-
 		const editor = vscode.window.activeTextEditor;
 		const selection = editor?.selection;
 		const selectedText = editor?.document.getText(selection);
@@ -30,11 +18,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const response = await callOpenAI(command + selectedText);
 
-		//Write the response to the file
 		const fileUri = vscode.Uri.file("/Users/rajesh/Learn/tmp/PalindromeTest.java");
 		await vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(response.data.choices[0].text));
 		vscode.window.showTextDocument(fileUri, { preview: false });
-
 	});
 
 	let disposableExplainCode = vscode.commands.registerCommand('kanzen.explainCode', async () => {
@@ -131,6 +117,12 @@ function addNewLine(input: string) {
 	}
 	return output;
 }
+
+//Function to surround the input string with the new line character
+function surroundWithNewLine(input: string) {
+	return "\n" + input + "\n";
+}
+
 
 // This method is called when your extension is deactivated
 export function deactivate() {
