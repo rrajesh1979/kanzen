@@ -7,11 +7,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	console.log('Congratulations, your extension "kanzen" is now active!');
 
-	let disposableCreateTestCase = vscode.commands.registerCommand('kanzen.createTestCase', async () => {
-		const editor = vscode.window.activeTextEditor;
-		const selection = editor?.selection;
-		const selectedText = editor?.document.getText(selection);
+	const editor = vscode.window.activeTextEditor;
+	const selection = editor?.selection;
+	const selectedText = editor?.document.getText(selection);
 
+	let disposableCreateTestCase = vscode.commands.registerCommand('kanzen.createTestCase', async () => {
 		vscode.window.showInformationMessage('Creating Test Case for you!');
 
 		const command = "Create JUnit5 Test Case for the following piece of code. Include positive and negative test cases. :";
@@ -24,10 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableExplainCode = vscode.commands.registerCommand('kanzen.explainCode', async () => {
-		const editor = vscode.window.activeTextEditor;
-		const selection = editor?.selection;
-		const selectedText = editor?.document.getText(selection);
-
 		vscode.window.showInformationMessage('Generating Explanation for Code!');
 
 		const command = "Generate explanation for this segment of code. :";
@@ -41,10 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableRefactorCodeToFunctional = vscode.commands.registerCommand('kanzen.refactorCodeToFunctional', async () => {
-		const editor = vscode.window.activeTextEditor;
-		const selection = editor?.selection;
-		const selectedText = editor?.document.getText(selection);
-
 		vscode.window.showInformationMessage('Refactoring Code!');
 
 		const command = "Java. Refactor code into functional programming style. :";
@@ -57,10 +49,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableCustom = vscode.commands.registerCommand('kanzen.custom', async () => {
-		const editor = vscode.window.activeTextEditor;
-		const selection = editor?.selection;
-		const selectedText = editor?.document.getText(selection);
-
 		const customCommand = await vscode.window.showInputBox({
 			placeHolder: "Custom Command",
 			prompt: "What do you want to do?",
@@ -72,7 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		if (customCommand !== undefined) {
-
 			vscode.window.showInformationMessage('Executing Custom Command!');
 
 			const command = customCommand + " :";
@@ -81,6 +68,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 			var refactoredCode = response.data.choices[0].text;
 			editor?.edit(builder => builder.replace(editor?.selection, refactoredCode));
+
+			vscode.window.showInformationMessage('Custom Command Executed!');
 		}
 
 	});
@@ -103,18 +92,15 @@ async function callOpenAI(selectedText: any) {
 		model: "text-davinci-003",
 		prompt: selectedText,
 		max_tokens: 1024,
-		temperature: 0.6,
+		temperature: 0.7,
 	});
 	return response;
 }
 
 //Function to add newline characters for every line in the input string
 function addNewLine(input: string) {
-	var output = "";
-	var lines = input.split(". ");
-	for (var i = 0; i < lines.length; i++) {
-		output += lines[i] + "\n";
-	}
+	//Replace all ". " with ".\n"
+	var output = input.replace(/\. /g, ".\n");
 	return output;
 }
 
